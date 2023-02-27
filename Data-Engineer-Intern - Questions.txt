@@ -1,0 +1,34 @@
+1. How would you deploy this application in production?
+Ans: Deploying this app in production would require setting up necessary infrastructure and configuring various components.
+- Specify access policies and permissions for the SQS queue for security concerns
+- Set up security groups and permissions for running the Postgres instance
+- Instead of a single-threaded application with both the SQS consumer and Postgres writer on one thread running sequentially, isolate the consumer and postgres writer into two separate threads.
+- Set up standby instances of consumer and writer in case of a system crash in either the consumer or writer.
+- Setup containerization tools such as docker or kubernetes for easy deployment. This will make it easier to scale and provide a uniform runtime environment later on as requirements and laod change.
+
+
+2. What other components would you want to add to make this production ready?
+Ans:
+- Setup monitoring and logging tools to track the health of the application
+- Configure the application to use production environment variables and settings. Have separate dev and qa environment variables and configs for development and testing
+- Setup a build tool for continuous code integration, build and deployment
+- Add error handling and fault tolerance mechanisms in and outside of the code such as retries, dead-letter queues, and circuit breakers.
+- Have backup and recovery strategies for the database
+
+
+3. How can this application scale with a growing dataset?
+Ans:
+- Use auto-scaling tools provided by AWS to scale based on CPU and memory utilization of either the consumer or writer. This can be achieved by either horizontal or vertical scaling of the applciation.
+- Use partitioning and sharding techniques to distribute the data across different consumers and db writers and potentially even different database instances if multiple application instances are setup
+
+
+4. How can PII be recovered later on?
+Ans:
+- For the implementation provided the PII data can be recovered by using the private key to decrypt the masked data. The private key can be stored in a secure credvault.
+- PII data and corresponding key can also be archived on a daily basis to provided added security as using the same key daily can increase chances of security breaches. 
+
+
+5. What are the assumptions you made?
+Ans:
+- Assumptions made in my implementation is a fixed size number of messages which can fit in memory. This will not be the case for a production ready application
+- The application does not provide real-time performance since the processing of messages is batched, i.e, first a batch of messages are read, then encrypted and, then persisted. Ideally, this should happen in a streaming fashion.
